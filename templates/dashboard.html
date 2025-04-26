@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Job Dashboard - LinkedIn Job Scraper{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="card-title mb-0"><i class="bi bi-graph-up"></i> Job Dashboard</h2>
+                </div>
+                <div class="card-body">
+                    <p class="lead">View statistics and recent jobs from your LinkedIn job scraper.</p>
+                    <div class="alert alert-info">
+                        <strong>Total Jobs Found:</strong> {{ total_jobs }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Stats Cards -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4><i class="bi bi-tags"></i> Jobs by Keyword</h4>
+                </div>
+                <div class="card-body">
+                    {% if keyword_stats %}
+                        <canvas id="keywordChart" width="100%" height="200"></canvas>
+                        <div class="list-group mt-3">
+                            {% for keyword, count in keyword_stats %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ keyword }}
+                                    <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No keyword statistics available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4><i class="bi bi-building"></i> Top Companies</h4>
+                </div>
+                <div class="card-body">
+                    {% if company_stats %}
+                        <canvas id="companyChart" width="100%" height="200"></canvas>
+                        <div class="list-group mt-3">
+                            {% for company, count in company_stats %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ company }}
+                                    <span class="badge bg-success rounded-pill">{{ count }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No company statistics available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-white">
+                    <h4><i class="bi bi-geo-alt"></i> Top Locations</h4>
+                </div>
+                <div class="card-body">
+                    {% if location_stats %}
+                        <canvas id="locationChart" width="100%" height="200"></canvas>
+                        <div class="list-group mt-3">
+                            {% for location, count in location_stats %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ location }}
+                                    <span class="badge bg-warning rounded-pill">{{ count }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No location statistics available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Jobs Table -->
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h4><i class="bi bi-list-task"></i> Recent Jobs</h4>
+                </div>
+                <div class="card-body">
+                    {% if recent_jobs %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Keyword</th>
+                                        <th>Title</th>
+                                        <th>Company</th>
+                                        <th>Location</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for job in recent_jobs %}
+                                        <tr>
+                                            <td><span class="badge bg-info">{{ job.keyword }}</span></td>
+                                            <td>{{ job.title }}</td>
+                                            <td>{{ job.company }}</td>
+                                            <td>{{ job.location }}</td>
+                                            <td>
+                                                <a href="{{ job.link }}" class="btn btn-primary btn-sm" target="_blank">
+                                                    <i class="bi bi-linkedin"></i> View
+                                                </a>
+                                                {% if job.id %}
+                                                <a href="/job/{{ job.id }}" class="btn btn-outline-info btn-sm">
+                                                    <i class="bi bi-info-circle"></i> Details
+                                                </a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-secondary">
+                            <i class="bi bi-info-circle"></i> No jobs have been found yet. The job checker will scan for new jobs every {{ check_interval // 60 }} minutes.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+{% if keyword_stats %}
+// Keyword Chart
+const keywordCtx = document.getElementById('keywordChart').getContext('2d');
+const keywordChart = new Chart(keywordCtx, {
+    type: 'pie',
+    data: {
+        labels: [{% for keyword, count in keyword_stats %}'{{ keyword }}',{% endfor %}],
+        datasets: [{
+            label: 'Jobs by Keyword',
+            data: [{% for keyword, count in keyword_stats %}{{ count }},{% endfor %}],
+            backgroundColor: [
+                '#3366CC', '#DC3912', '#FF9900', '#109618', '#990099',
+                '#0099C6', '#DD4477', '#66AA00', '#B82E2E', '#316395'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            }
+        }
+    }
+});
+{% endif %}
+
+{% if company_stats %}
+// Company Chart
+const companyCtx = document.getElementById('companyChart').getContext('2d');
+const companyChart = new Chart(companyCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [{% for company, count in company_stats %}'{{ company }}',{% endfor %}],
+        datasets: [{
+            label: 'Jobs by Company',
+            data: [{% for company, count in company_stats %}{{ count }},{% endfor %}],
+            backgroundColor: [
+                '#3366CC', '#DC3912', '#FF9900', '#109618', '#990099',
+                '#0099C6', '#DD4477', '#66AA00', '#B82E2E', '#316395'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+{% endif %}
+
+{% if location_stats %}
+// Location Chart
+const locationCtx = document.getElementById('locationChart').getContext('2d');
+const locationChart = new Chart(locationCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [{% for location, count in location_stats %}'{{ location }}',{% endfor %}],
+        datasets: [{
+            label: 'Jobs by Location',
+            data: [{% for location, count in location_stats %}{{ count }},{% endfor %}],
+            backgroundColor: [
+                '#3366CC', '#DC3912', '#FF9900', '#109618', '#990099',
+                '#0099C6', '#DD4477', '#66AA00', '#B82E2E', '#316395'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+{% endif %}
+</script>
+{% endblock %}

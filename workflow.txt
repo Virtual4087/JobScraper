@@ -1,0 +1,2 @@
+[commands]
+job_scraper = python main.py

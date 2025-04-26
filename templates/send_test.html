@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Send Test Message - LinkedIn Job Scraper{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <header class="mb-4">
+        <h1>LinkedIn Job Scraper</h1>
+        <p class="text-muted">Send test notifications to verify Telegram integration</p>
+    </header>
+
+    <nav class="mb-4">
+        <ul class="nav nav-pills">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/telegram-setup">Telegram Setup</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="/send-test">Send Test Message</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="mb-0">Send Test Notification</h2>
+                </div>
+                <div class="card-body">
+                    {% if not telegram_token %}
+                        <div class="alert alert-warning">
+                            <h4 class="alert-heading">Telegram Bot Token Not Configured</h4>
+                            <p>You need to configure your Telegram bot token before sending test messages.</p>
+                            <a href="/telegram-setup" class="btn btn-primary">Setup Telegram</a>
+                        </div>
+                    {% elif not chat_ids %}
+                        <div class="alert alert-warning">
+                            <h4 class="alert-heading">No Chat IDs Configured</h4>
+                            <p>You need to add chat IDs to send messages to.</p>
+                            <a href="/telegram-setup" class="btn btn-primary">Setup Telegram</a>
+                        </div>
+                    {% else %}
+                        <p>Send a test message to verify that your Telegram notifications are working correctly.</p>
+                        <p>This will send a test message to {{ chat_ids|length }} configured Telegram users.</p>
+                        
+                        <div class="d-grid gap-2 mb-3">
+                            <button id="sendTestButton" class="btn btn-primary">Send Test Message</button>
+                        </div>
+                        
+                        <div id="resultContainer" class="d-none">
+                            <div class="alert alert-success" id="successMessage">
+                                <h4 class="alert-heading">Success!</h4>
+                                <p>Test message sent successfully.</p>
+                            </div>
+                            <div class="alert alert-danger d-none" id="errorMessage">
+                                <h4 class="alert-heading">Error</h4>
+                                <p>Failed to send test message. Please check your configuration.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">Telegram Status</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Bot Token
+                            {% if telegram_token %}
+                                <span class="badge bg-success rounded-pill">Configured</span>
+                            {% else %}
+                                <span class="badge bg-danger rounded-pill">Not Configured</span>
+                            {% endif %}
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Chat IDs
+                            {% if chat_ids %}
+                                <span class="badge bg-success rounded-pill">{{ chat_ids|length }}</span>
+                            {% else %}
+                                <span class="badge bg-danger rounded-pill">None</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sendTestButton = document.getElementById('sendTestButton');
+        const resultContainer = document.getElementById('resultContainer');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        if (sendTestButton) {
+            sendTestButton.addEventListener('click', function() {
+                // Disable button and show loading state
+                sendTestButton.disabled = true;
+                sendTestButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
+                
+                // Call the API endpoint
+                fetch('/api/send-test')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Show result
+                        resultContainer.classList.remove('d-none');
+                        
+                        if (data.success) {
+                            successMessage.classList.remove('d-none');
+                            errorMessage.classList.add('d-none');
+                        } else {
+                            successMessage.classList.add('d-none');
+                            errorMessage.classList.remove('d-none');
+                        }
+                        
+                        // Re-enable button
+                        sendTestButton.disabled = false;
+                        sendTestButton.innerHTML = 'Send Test Message';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Show error
+                        resultContainer.classList.remove('d-none');
+                        successMessage.classList.add('d-none');
+                        errorMessage.classList.remove('d-none');
+                        
+                        // Re-enable button
+                        sendTestButton.disabled = false;
+                        sendTestButton.innerHTML = 'Send Test Message';
+                    });
+            });
+        }
+    });
+</script>
+{% endblock %}

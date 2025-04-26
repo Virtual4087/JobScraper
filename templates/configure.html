@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Configure Search Parameters{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Configure Job Search Parameters</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('configure_page') }}">
+                <div class="mb-3">
+                    <label for="keywords" class="form-label">Keywords (comma-separated)</label>
+                    <input type="text" class="form-control" id="keywords" name="keywords" 
+                        value="{{ config.keywords }}" 
+                        placeholder="e.g. python,javascript,react,remote">
+                    <div class="form-text">Enter job keywords separated by commas (no spaces)</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" class="form-control" id="location" name="location" 
+                        value="{{ config.location }}" 
+                        placeholder="e.g. United States">
+                    <div class="form-text">Enter location for job search</div>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="remote_only" name="remote_only" 
+                        {% if config.remote_only %}checked{% endif %}>
+                    <label class="form-check-label" for="remote_only">Remote Jobs Only</label>
+                </div>
+
+                <div class="mb-3">
+                    <label for="days_recent" class="form-label">Job Freshness</label>
+                    <select class="form-select" id="days_recent" name="days_recent">
+                        <option value="1" {% if config.days_recent == 1 %}selected{% endif %}>Last 24 hours</option>
+                        <option value="7" {% if config.days_recent == 7 %}selected{% endif %}>Last 7 days</option>
+                        <option value="30" {% if config.days_recent == 30 %}selected{% endif %}>Last 30 days</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Configuration</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <div class="alert alert-info">
+            <h4 class="alert-heading">How Configuration Works</h4>
+            <p>Changes to the configuration will immediately restart the job checking service with new parameters.</p>
+            <p>Configuration will be reset if the server restarts. For permanent changes, update environment variables.</p>
+            <hr>
+            <p class="mb-0">Changes will affect what jobs are pulled during the next scheduled check (every 5 minutes).</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

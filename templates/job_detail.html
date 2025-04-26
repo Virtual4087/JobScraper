@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Job Details - {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Job Details</li>
+                </ol>
+            </nav>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="card-title mb-0">
+                        <i class="bi bi-briefcase"></i> {{ job.title }}
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h4 class="mb-3">Job Information</h4>
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <th style="width: 150px;"><i class="bi bi-building"></i> Company:</th>
+                                        <td>{{ job.company }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="bi bi-geo-alt"></i> Location:</th>
+                                        <td>{{ job.location }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="bi bi-tag"></i> Keyword:</th>
+                                        <td><span class="badge bg-info">{{ job.keyword }}</span></td>
+                                    </tr>
+                                    {% if job.description %}
+                                    <tr>
+                                        <th><i class="bi bi-file-text"></i> Description:</th>
+                                        <td>{{ job.description|safe }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if job.date_posted %}
+                                    <tr>
+                                        <th><i class="bi bi-calendar"></i> Posted:</th>
+                                        <td>{{ job.date_posted }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Actions</h5>
+                                    <a href="{{ job.link }}" class="btn btn-primary btn-lg w-100 mb-3" target="_blank">
+                                        <i class="bi bi-linkedin"></i> View on LinkedIn
+                                    </a>
+                                    
+                                    <h5 class="mt-4">Job ID</h5>
+                                    <p class="text-muted">{{ job.id }}</p>
+                                    
+                                    {% if job.timestamp %}
+                                    <h5 class="mt-4">Found On</h5>
+                                    <p class="text-muted">{{ job.timestamp.strftime('%B %d, %Y at %H:%M') if job.timestamp else 'Unknown' }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="/dashboard" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

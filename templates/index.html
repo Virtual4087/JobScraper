@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}LinkedIn Job Scraper - Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">System Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Running Status</h6>
+                        <p>
+                            {% if app_state.running %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-danger">Paused</span>
+                            {% endif %}
+                        </p>
+
+                        <h6 class="text-muted">Last Check</h6>
+                        <p>
+                            {% if app_state.last_check %}
+                            {{ app_state.last_check.strftime('%Y-%m-%d %H:%M:%S') }}
+                            {% else %}
+                            Never
+                            {% endif %}
+                        </p>
+
+                        <h6 class="text-muted">Next Check</h6>
+                        <p>{{ next_check }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Uptime</h6>
+                        <p>{{ uptime }}</p>
+
+                        <h6 class="text-muted">Jobs Found</h6>
+                        <p>{{ app_state.jobs_found }}</p>
+
+                        <h6 class="text-muted">Check Interval</h6>
+                        <p>{{ check_interval // 60 }} minutes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Monitoring Keywords</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for keyword in keywords %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ keyword }}
+                        <span class="badge bg-primary rounded-pill">{{ app_state.keyword_stats[keyword] }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="/api/send-test" class="btn btn-outline-primary">Send Test Message</a>
+                    <a href="/ping" class="btn btn-outline-secondary">Check Status</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if app_state.recent_jobs %}
+<div class="card mt-4">
+    <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0">Recently Found Jobs</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Company</th>
+                        <th>Location</th>
+                        <th>Keyword</th>
+                        <th>Found</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in app_state.recent_jobs %}
+                    <tr>
+                        <td>{{ job.title }}</td>
+                        <td>{{ job.company }}</td>
+                        <td>{{ job.location }}</td>
+                        <td><span class="badge bg-info">{{ job.keyword }}</span></td>
+                        <td>{{ job.timestamp.strftime('%Y-%m-%d %H:%M') if job.timestamp else 'Unknown' }}</td>
+                        <td><a href="{{ job.link }}" target="_blank" class="btn btn-sm btn-primary">View</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto refresh the page every 60 seconds
+    setTimeout(function() {
+        location.reload();
+    }, 60000);
+</script>
+{% endblock %}

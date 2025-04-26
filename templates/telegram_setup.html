@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Telegram Notification Setup{% endblock %}
+
+{% block extra_head %}
+    <meta http-equiv="refresh" content="60">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Telegram Notification Setup</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">How to Set Up Telegram Notifications</h5>
+        </div>
+        <div class="card-body">
+            <h5>Step 1: Start a conversation with the bot</h5>
+            <p>Each user who wants to receive notifications must start a conversation with the LinkedIn Job Scraper bot:</p>
+            <ol>
+                <li>Open Telegram and search for <code>@{{ bot_username }}</code></li>
+                <li>Start a conversation by sending the message <code>/start</code></li>
+            </ol>
+            
+            <h5 class="mt-4">Step 2: Verify bot interactions</h5>
+            <p>After users have interacted with the bot, you can check for valid chat IDs:</p>
+            <div class="bg-dark p-3 rounded mb-3">
+                <code>python send_test_message.py --get-updates</code>
+            </div>
+            
+            <h5 class="mt-4">Step 3: Send welcome messages</h5>
+            <p>New users who start the bot will automatically receive a welcome message. You can manually trigger this process to welcome any new users:</p>
+            <div class="bg-dark p-3 rounded mb-3">
+                <code>python send_test_message.py --welcome</code>
+            </div>
+            
+            <h5 class="mt-4">Step 4: Send test messages</h5>
+            <p>Once chat IDs are properly configured, you can send test messages to all users:</p>
+            <div class="bg-dark p-3 rounded mb-3">
+                <code>python send_test_message.py</code>
+            </div>
+            
+            <div class="alert alert-info mt-4">
+                <strong>Note:</strong> If users aren't receiving messages, make sure they've initiated a conversation with the bot first.
+            </div>
+            
+            <div class="alert alert-success mt-4">
+                <h5 class="alert-heading"><i class="bi bi-robot"></i> Automatic Welcome Messages</h5>
+                <p>New users who start the bot will automatically receive a welcome message!</p>
+                <hr>
+                <p class="mb-0">The system checks for new users every 10 minutes and sends personalized welcome messages to anyone who has started the bot.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Current Configuration</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4"><strong>Bot Username:</strong></div>
+                <div class="col-md-8">@{{ bot_username }}</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-4"><strong>Telegram Bot Token:</strong></div>
+                <div class="col-md-8">
+                    {% if telegram_token %}
+                        <span class="badge bg-success">Configured</span>
+                    {% else %}
+                        <span class="badge bg-danger">Not Configured</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-4"><strong>Registered Chat IDs:</strong></div>
+                <div class="col-md-8">
+                    {% if chat_ids and chat_ids|length > 0 %}
+                        <ul class="list-group">
+                            {% for chat_id in chat_ids %}
+                                <li class="list-group-item">{{ chat_id }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <span class="badge bg-warning">No Chat IDs Configured</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-between mb-4">
+        <a href="/" class="btn btn-primary">Back to Dashboard</a>
+        <button id="refreshBtn" class="btn btn-success">Refresh Status</button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.getElementById('refreshBtn').addEventListener('click', function() {
+        location.reload();
+    });
+</script>
+{% endblock %}

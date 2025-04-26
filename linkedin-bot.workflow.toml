@@ -1,0 +1,9 @@
+[jobs.bot]
+command = "python run_bot.py"
+persistent = true
+onBoot = true
+
+[jobs.app]
+command = "python run.py"
+persistent = true
+onBoot = true
