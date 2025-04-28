@@ -113,7 +113,9 @@
                                         <th>Title</th>
                                         <th>Company</th>
                                         <th>Location</th>
+                                        <th>Source</th>
                                         <th>Actions</th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -123,6 +125,7 @@
                                             <td>{{ job.title }}</td>
                                             <td>{{ job.company }}</td>
                                             <td>{{ job.location }}</td>
+                                            <td>{{}job.source}</td>
                                             <td>
                                                 <a href="{{ job.link }}" class="btn btn-primary btn-sm" target="_blank">
                                                     <i class="bi bi-linkedin"></i> View

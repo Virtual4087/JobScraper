@@ -12,7 +12,7 @@ REMOTE_ONLY = os.getenv('REMOTE_ONLY', 'true').lower() == 'true'
 DAYS_RECENT = int(os.getenv('DAYS_RECENT', '1'))  # Jobs posted in last X days
 
 # Time intervals
-CHECK_INTERVAL = int(os.getenv('CHECK_INTERVAL', '300'))  # 5 minutes between checks
+CHECK_INTERVAL = int(os.getenv('CHECK_INTERVAL', '120'))  # 5 minutes between checks
 
 # LinkedIn search parameters
 LINKEDIN_HEADERS = {
