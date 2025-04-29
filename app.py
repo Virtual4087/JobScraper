@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 from job_checker import JobChecker
 from app_state import app_state
 from config import CHECK_INTERVAL, KEYWORDS, LOCATION
+import os
 
 
 
@@ -66,5 +67,7 @@ def stop():
 
 
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))  # Render provides PORT env variable
     print("Starting Web Server...")
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', port=port, debug=True)
+
