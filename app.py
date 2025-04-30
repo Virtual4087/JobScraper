@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 from job_checker import JobChecker
 from app_state import app_state
 from config import CHECK_INTERVAL, KEYWORDS, LOCATION
+import threading
 import os
 
 
@@ -22,16 +23,25 @@ def setup():
         print(f"User entered keywords: {keywords}")
         print(f"User entered location: {location}")
 
-
-        job_checker = JobChecker(keywords, location)
-        job_checker.start()
-
+        # Store config
         app_state["keywords"] = keywords
         app_state["location"] = location
 
-        return redirect(url_for('index'))
-    
+        # ✅ Redirect user immediately
+        redirect_url = url_for('index')
+
+        # ✅ Now start scraper in background thread
+        threading.Thread(target=start_job_checker_in_background, args=(keywords, location)).start()
+
+        return redirect(redirect_url)
+
     return render_template('setup.html')
+
+
+def start_job_checker_in_background(keywords, location):
+    global job_checker
+    job_checker = JobChecker(keywords, location)
+    job_checker.start()
 
 
 @app.route('/')
