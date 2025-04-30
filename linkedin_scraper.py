@@ -13,12 +13,11 @@ class LinkedInScraper:
         self.job_storage = job_storage
         self.first_run = True  # Flag to track first run
     
-    def _build_search_url(self, keyword, location):
+    def _build_search_url(self, keyword):
         """Build LinkedIn job search URL with parameters"""
         # URL encode the keyword
-        location = location or LOCATION
         encoded_keyword = quote(keyword)
-        encoded_location = quote(location)
+        encoded_location = quote(LOCATION)
         
         # Base URL
         url = f'https://www.linkedin.com/jobs/search/?keywords={encoded_keyword}&location={encoded_location}'
@@ -40,12 +39,10 @@ class LinkedInScraper:
         
         return url
     
-    def get_jobs(self, keyword, location):
+    def get_jobs(self, keyword):
         """Scrape LinkedIn for jobs matching the keyword"""
-        search_url = self._build_search_url(keyword, location)
+        search_url = self._build_search_url(keyword)
         logger.debug(f"Searching LinkedIn: {search_url}")
-        print(f"Searching LinkedIn: {search_url}")
-
         
         try:
             # Add a small random delay to avoid rate limiting

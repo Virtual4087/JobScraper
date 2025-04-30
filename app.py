@@ -1,15 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for
 from job_checker import JobChecker
 from app_state import app_state
-from config import CHECK_INTERVAL, KEYWORDS, LOCATION
-import threading
-import os
+from config import CHECK_INTERVAL
 
 app = Flask(__name__)
-job_checker = None  # Define but don't start yet
+job_checker = None  # Global job checker
 
-
-@app.route('/setup', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def setup():
     global job_checker
     if request.method == 'POST':
@@ -19,42 +16,28 @@ def setup():
         keywords = [kw.strip() for kw in user_input.split(',') if kw.strip()]
         location = user_location.strip() if user_location else "United States"
 
-        print(f"[SETUP] User entered keywords: {keywords}")
-        print(f"[SETUP] User entered location: {location}")
+        print(f"User entered keywords: {keywords}")
+        print(f"User entered location: {location}")
 
-        # Save to global app state
+        # Save to app state
         app_state["keywords"] = keywords
         app_state["location"] = location
 
-        # Start scraping in a background thread
-        threading.Thread(
-            target=start_job_checker_in_background,
-            args=(keywords, location),
-            daemon=True
-        ).start()
+        # Start the scraper
+        job_checker = JobChecker(keywords, location)
+        job_checker.start()
 
-        return redirect(url_for('index'))
+        return redirect(url_for('dashboard'))
 
     return render_template('setup.html')
 
 
-def start_job_checker_in_background(keywords, location):
-    global job_checker
-    if job_checker:
-        job_checker.stop()
-    job_checker = JobChecker(keywords, location)
-    job_checker.start()
-
-
-@app.route('/')
-def index():
+@app.route('/dashboard')
+def dashboard():
     next_check = app_state.get("next_check", "Unknown")
-    uptime = "Unknown"
-    keywords = app_state.get("keywords", KEYWORDS)
-    location = app_state.get("location", LOCATION)
-
-    print(f"[INDEX] keywords: {keywords}")
-    print(f"[INDEX] location: {location}")
+    uptime = "Unknown"  # You can calculate it if needed
+    keywords = app_state.get("keywords", [])
+    location = app_state.get("location", "Unknown")
 
     return render_template(
         'index.html',
@@ -77,6 +60,7 @@ def stop():
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    import os
+    port = int(os.environ.get("PORT", 5000))
     print("Starting Web Server...")
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(debug=True, host="0.0.0.0", port=port)

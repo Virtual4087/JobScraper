@@ -14,8 +14,8 @@ app_state = {
     "keyword_stats": defaultdict(int),  # Count of jobs by keyword
     "company_stats": defaultdict(int),  # Count of jobs by company
     "location_stats": defaultdict(int),  # Count of jobs by location
-    "keywords": [],            
-    "location": "United States"
+    "location":"",
+    "keywords":""
 }
 
 # Maximum number of recent jobs to store

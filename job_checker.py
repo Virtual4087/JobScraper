@@ -31,10 +31,7 @@ class JobChecker:
         try:
             for keyword in self.keywords:
                 try:
-                    linkedin_jobs = self.linkedin_scraper.get_jobs(keyword, self.location)  # if not scraping LinkedIn now
-
-                    all_new_jobs.extend(linkedin_jobs)
-
+                    linkedin_jobs = []  # if not scraping LinkedIn now
                     dice_jobs = self.dice_scraper.get_jobs(keyword, self.location)
 
                     all_new_jobs.extend(dice_jobs)
