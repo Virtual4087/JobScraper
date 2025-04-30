@@ -4,8 +4,6 @@ from app_state import app_state
 from config import CHECK_INTERVAL, KEYWORDS, LOCATION
 import threading
 import os
-from playwright.sync_api import sync_playwright
-
 
 app = Flask(__name__)
 job_checker = None  # Define but don't start yet
@@ -50,30 +48,23 @@ def start_job_checker_in_background(keywords, location):
 
 @app.route('/')
 def index():
-    # next_check = app_state.get("next_check", "Unknown")
-    # uptime = "Unknown"
-    # keywords = app_state.get("keywords", KEYWORDS)
-    # location = app_state.get("location", LOCATION)
+    next_check = app_state.get("next_check", "Unknown")
+    uptime = "Unknown"
+    keywords = app_state.get("keywords", KEYWORDS)
+    location = app_state.get("location", LOCATION)
 
-    # print(f"[INDEX] keywords: {keywords}")
-    # print(f"[INDEX] location: {location}")
+    print(f"[INDEX] keywords: {keywords}")
+    print(f"[INDEX] location: {location}")
 
-    # return render_template(
-    #     'index.html',
-    #     app_state=app_state,
-    #     next_check=next_check,
-    #     uptime=uptime,
-    #     check_interval=CHECK_INTERVAL,
-    #     keywords=keywords,
-    #     location=location
-    # )
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        page = browser.new_page()
-        page.goto("https://dice.com")
-        title = page.title()
-        browser.close()
-        return f"Page title is: {title}"
+    return render_template(
+        'index.html',
+        app_state=app_state,
+        next_check=next_check,
+        uptime=uptime,
+        check_interval=CHECK_INTERVAL,
+        keywords=keywords,
+        location=location
+    )
 
 
 @app.route('/stop')
