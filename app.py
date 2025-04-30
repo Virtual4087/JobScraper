@@ -31,7 +31,11 @@ def setup():
         redirect_url = url_for('index')
 
         # ✅ Now start scraper in background thread
-        threading.Thread(target=start_job_checker_in_background, args=(keywords, location)).start()
+        threading.Thread(
+            target=start_job_checker_in_background,
+            args=(keywords, location),
+            daemon=True  # ✅ important
+        ).start()
 
         return redirect(redirect_url)
 
@@ -40,8 +44,11 @@ def setup():
 
 def start_job_checker_in_background(keywords, location):
     global job_checker
+    if job_checker:
+        job_checker.stop()
     job_checker = JobChecker(keywords, location)
     job_checker.start()
+
 
 
 @app.route('/')
@@ -79,5 +86,5 @@ def stop():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # Render provides PORT env variable
     print("Starting Web Server...")
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)
 
