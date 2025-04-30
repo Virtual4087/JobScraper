@@ -5,10 +5,9 @@ from config import CHECK_INTERVAL, KEYWORDS, LOCATION
 import threading
 import os
 
-
-
 app = Flask(__name__)
-job_checker = None  # ✅ Just define it, don't create yet!
+job_checker = None  # Define but don't start yet
+
 
 @app.route('/setup', methods=['GET', 'POST'])
 def setup():
@@ -20,24 +19,21 @@ def setup():
         keywords = [kw.strip() for kw in user_input.split(',') if kw.strip()]
         location = user_location.strip() if user_location else "United States"
 
-        print(f"User entered keywords: {keywords}")
-        print(f"User entered location: {location}")
+        print(f"[SETUP] User entered keywords: {keywords}")
+        print(f"[SETUP] User entered location: {location}")
 
-        # Store config
+        # Save to global app state
         app_state["keywords"] = keywords
         app_state["location"] = location
 
-        # ✅ Redirect user immediately
-        redirect_url = url_for('index')
-
-        # ✅ Now start scraper in background thread
+        # Start scraping in a background thread
         threading.Thread(
             target=start_job_checker_in_background,
             args=(keywords, location),
-            daemon=True  # ✅ important
+            daemon=True
         ).start()
 
-        return redirect(redirect_url)
+        return redirect(url_for('index'))
 
     return render_template('setup.html')
 
@@ -50,18 +46,15 @@ def start_job_checker_in_background(keywords, location):
     job_checker.start()
 
 
-
 @app.route('/')
 def index():
-    global job_checker
+    next_check = app_state.get("next_check", "Unknown")
+    uptime = "Unknown"
+    keywords = app_state.get("keywords", KEYWORDS)
+    location = app_state.get("location", LOCATION)
 
-    next_check = "Unknown"  # or calculate
-    uptime = "Unknown"      # or calculate
-    keywords = app_state["keywords"] if "keywords" in app_state else KEYWORDS
-    location = app_state["location"] if "location" in app_state else "United States"
-    
-    print(f"keywords: {keywords}")
-    print(f"location: {location}")
+    print(f"[INDEX] keywords: {keywords}")
+    print(f"[INDEX] location: {location}")
 
     return render_template(
         'index.html',
@@ -73,7 +66,7 @@ def index():
         location=location
     )
 
-    
+
 @app.route('/stop')
 def stop():
     global job_checker
@@ -84,7 +77,6 @@ def stop():
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Render provides PORT env variable
+    port = int(os.environ.get('PORT', 5000))
     print("Starting Web Server...")
     app.run(host='0.0.0.0', port=port, debug=False)
-
