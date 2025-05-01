@@ -18,7 +18,14 @@ def setup():
 
         print(f"User entered keywords: {keywords}")
         print(f"User entered location: {location}")
-
+        
+        # Clear only job-related data to avoid showing previous jobs
+        app_state["recent_jobs"] = []
+        app_state["jobs_found"] = 0
+        app_state["keyword_stats"] = {}
+        app_state["company_stats"] = {}
+        app_state["location_stats"] = {}
+        
         # Save to app state
         app_state["keywords"] = keywords
         app_state["location"] = location
