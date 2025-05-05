@@ -2,5 +2,5 @@ flask
 requests
 beautifulsoup4
 selenium
+playwright
 webdriver-manager
-Flask
