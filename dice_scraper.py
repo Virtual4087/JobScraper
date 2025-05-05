@@ -12,10 +12,16 @@ class DiceScraper:
         self.first_run = True
     
     def build_dice_url(self, keyword, location, page=1):
+        from urllib.parse import quote
+        
+        # Encode spaces and special characters in keyword and location
+        encoded_keyword = quote(keyword)
+        encoded_location = quote(location)
+        
         return (
             f"https://www.dice.com/jobs?"
-            f"q={keyword}"
-            f"&location={location}"
+            f"q={encoded_keyword}"
+            f"&location={encoded_location}"
             f"&countryCode=US"
             f"&radius=30"
             f"&radiusUnit=mi"
@@ -24,7 +30,6 @@ class DiceScraper:
             f"&filters.postedDate=ONE"
             f"&language=en"
         )
-
 
     def get_jobs(self, keyword, location, max_results=20):
         jobs = []
