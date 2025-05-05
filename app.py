@@ -6,6 +6,10 @@ from config import CHECK_INTERVAL
 app = Flask(__name__)
 job_checker = None  # Global job checker
 
+@app.route('/health')
+def health():
+    return {"status": "ok", "port": os.environ.get("PORT", "unknown")}
+    
 @app.route('/', methods=['GET', 'POST'])
 def setup():
     global job_checker
