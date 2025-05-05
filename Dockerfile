@@ -2,17 +2,19 @@ ARG PORT=443
 FROM cypress/browsers:latest
 
 # Update first, then install Python
-RUN apt-get update && apt-get install -y python3 python3-pip
+RUN apt-get update && apt-get install -y python3 python3-pip python3-venv
+
+# Create and activate a virtual environment
+RUN python3 -m venv /app/venv
+ENV PATH="/app/venv/bin:$PATH"
 
 # Copy requirements before installing dependencies
 WORKDIR /app
 COPY requirements.txt .
 
-# Fix PATH environment variable
-ENV PATH=/root/.local/bin:${PATH}
-
-# Install Python packages
-RUN pip3 install --upgrade pip && pip3 install -r requirements.txt
+# Install Python packages (in the virtual environment)
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application
 COPY . .
